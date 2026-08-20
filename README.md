@@ -1,34 +1,44 @@
-# Chart QA Pipeline
+# ChartQA Pipeline — Intelligent Chart Question Answering System
 
-Hệ thống hỏi đáp thông minh về biểu đồ sử dụng 3 model AI:
+ChartVQA is an intelligent chart question-answering system designed to help users understand information presented in charts and graphs. The project combines computer vision, optical character recognition, and vision-language models to analyze an uploaded chart and answer questions about its content in Vietnamese or English.
+
+The system processes each request through a three-stage pipeline. First, a ResNet18-based classifier identifies the chart type, such as a bar chart, pie chart, or line chart. This classification helps determine whether the chart can be processed by the system. Next, PaddleOCR-VL extracts structured information from the chart, including labels, values, text, and relationships between visual elements. Finally, the Vintern vision-language model uses the original chart image, the detected chart type, and the extracted data to generate a natural-language answer to the user's question.
+
+The application is implemented with FastAPI and provides both a web interface and REST API endpoints. Users can upload chart images in common formats such as PNG, JPG, JPEG, and WEBP, then submit questions such as "Which company has the highest revenue?" or "What was the trend between 2020 and 2023?" The system returns the chart type, extracted data, generated answer, support status, and processing latency. It also provides session-based functionality, allowing an uploaded chart to be analyzed once and queried through a dedicated session.
+
+Because PaddleOCR-VL and Vintern require incompatible versions of the Transformers library, the project separates them into two virtual environments and two services. The main FastAPI application runs on port 8000, while the PaddleOCR-VL extraction server runs independently on port 8001. This architecture isolates dependencies while allowing the models to communicate through HTTP.
+
+The project is optimized for local GPU inference using CUDA and supports locally stored model weights. It includes configuration management, upload validation, health monitoring, Swagger API documentation, latency measurement, and GPU memory cleanup. Overall, the project provides an end-to-end solution for converting visual chart data into accessible, conversational answers.
+
+## Architecture
 
 ```
-Ảnh biểu đồ + Câu hỏi
+Chart Image + Question
         ↓
-   ResNet18(Classify chart)
+   ResNet18 (Classify chart)
         ↓
-   PaddleOCR-VL (extract data từ chart)
+   PaddleOCR-VL (extract data from chart)
         ↓
-   Vintern-1B (trả lời câu hỏi)
+   Vintern-1B (answer the question)
         ↓
-      Kết quả
+      Result
 ```
 
 ---
 
-## Cấu trúc thư mục
+## Project Structure
 
 ```
 your/path/to/files
-├── paddle_server.py          # Server riêng cho PaddleOCR-VL (port 8001)
-├── venv_paddle\              # Virtual env riêng cho Paddle (transformers>=4.45)
+├── paddle_server.py          # Dedicated server for PaddleOCR-VL (port 8001)
+├── venv_paddle\              # Dedicated virtual env for Paddle (transformers>=4.45)
 │
 └── files\
-    ├── main.py               # FastAPI app chính (port 8000)
-    ├── pipeline.py           # Orchestrator điều phối 3 bước
-    ├── config.py             # Cấu hình paths, device, params
-    ├── chart_classifier.py   #  classifier
-    ├── data_extractor.py     # HTTP client gọi paddle_server:8001
+    ├── main.py               # Main FastAPI app (port 8000)
+    ├── pipeline.py           # Orchestrator coordinating the 3 steps
+    ├── config.py             # Path, device, and parameter configuration
+    ├── chart_classifier.py   # Chart classifier
+    ├── data_extractor.py     # HTTP client calling paddle_server:8001
     ├── chart_qa.py           # Vintern QA engine
     ├── index.html            # Web UI
     ├── requirements.txt
@@ -36,26 +46,26 @@ your/path/to/files
     │   ├── vintern\          # Vintern-1B-v2 weights
     │   └── paddleocr_vl\     # PaddleOCR-VL weights
         └──resnet18
-    └── venv\                 # Virtual env chính (transformers==4.44.2)
+    └── venv\                 # Main virtual env (transformers==4.44.2)
 ```
 
 ---
 
-## Lý do dùng 2 virtual environment
+## Why Two Virtual Environments
 
-PaddleOCR-VL và Vintern yêu cầu **2 version transformers xung đột nhau**:
+PaddleOCR-VL and Vintern require **two conflicting versions of transformers**:
 
 | | venv (Main) | venv_paddle (Paddle) |
 |---|---|---|
 | transformers | `==4.44.2` | `>=4.45` |
-| Chứa | Vintern + FastAPI chính | PaddleOCR-VL + FastAPI mini |
+| Contains | Vintern + Main FastAPI | PaddleOCR-VL + Mini FastAPI |
 | Port | 8000 | 8001 |
 
 ---
 
-## Cài đặt lần đầu
+## Initial Setup
 
-### 1. Tải model về local
+### 1. Download the models locally
 
 ```powershell
 cd your/path/to/files
@@ -67,7 +77,7 @@ python -c "from huggingface_hub import snapshot_download; snapshot_download('5CD
 python -c "from huggingface_hub import snapshot_download; snapshot_download('PaddlePaddle/PaddleOCR-VL', local_dir='./models_local/paddleocr_vl')"
 ```
 
-### 2. Tạo venv_paddle
+### 2. Create venv_paddle
 
 ```powershell
 cd your/path/to/files
@@ -79,7 +89,7 @@ python -m pip install torch torchvision --index-url https://download.pytorch.org
 python -m pip install "transformers>=4.45" accelerate pillow fastapi uvicorn python-multipart httpx
 ```
 
-### 3. Cài dependencies cho venv chính
+### 3. Install dependencies for the main venv
 
 ```powershell
 cd your/path/to/files
@@ -91,9 +101,9 @@ python -m pip install "transformers==4.44.2" accelerate pillow fastapi uvicorn p
 
 ---
 
-## Chạy hệ thống
+## Running the System
 
-Mỗi lần chạy cần **2 terminal**:
+Each run requires **2 terminals**:
 
 ### Terminal 1 — Paddle Server
 
@@ -103,7 +113,7 @@ venv_paddle\Scripts\activate
 python -m uvicorn paddle_server:app --port 8001
 ```
 
-Chờ thấy:
+Wait until you see:
 ```
 PaddleOCR-VL ready on cuda
 ```
@@ -116,25 +126,25 @@ venv\Scripts\activate
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-Chờ thấy:
+Wait until you see:
 ```
 Pipeline ready in ~39s
 All models loaded. API ready.
 ```
 
-### Mở Web UI
+### Open the Web UI
 
-Truy cập: **http://localhost:8000**
+Go to: **http://localhost:8000**
 
 ---
 
-## Sử dụng
+## Usage
 
-1. Mở **http://localhost:8000**
-2. Upload ảnh biểu đồ (PNG, JPG, WEBP — tối đa 10MB)
-3. Nhập câu hỏi (tiếng Việt hoặc tiếng Anh)
-4. Nhấn **Phân tích & Trả lời**
-5. Xem kết quả gồm: chart type, extracted data, câu trả lời, latency
+1. Open **http://localhost:8000**
+2. Upload a chart image (PNG, JPG, WEBP — max 10MB)
+3. Enter your question (Vietnamese or English)
+4. Click **Analyze & Answer**
+5. View the results: chart type, extracted data, answer, and latency
 
 ---
 
@@ -145,14 +155,14 @@ Truy cập: **http://localhost:8000**
 ```bash
 curl -X POST http://localhost:8000/api/ask \
   -F "image=@chart.png" \
-  -F "question=Công ty nào có doanh thu cao nhất?"
+  -F "question=Which company has the highest revenue?"
 ```
 
 Response:
 ```json
 {
-  "question": "Công ty nào có doanh thu cao nhất?",
-  "answer": "FPT có doanh thu cao nhất.",
+  "question": "Which company has the highest revenue?",
+  "answer": "FPT has the highest revenue.",
   "chart_type": "h_bar",
   "extracted_data": "...",
   "latency": {
@@ -166,17 +176,17 @@ Response:
 
 ### `GET /health`
 
-Kiểm tra trạng thái models.
+Check the status of the models.
 
 ### `GET /docs`
 
-Swagger UI để test API trực tiếp trên browser.
+Swagger UI to test the API directly in the browser.
 
 ---
 
-## Cấu hình
+## Configuration
 
-Chỉnh trong `config.py`:
+Edit in `config.py`:
 
 ```python
 Resnet_MODEL_PATH   = "Resnet18/best.pt"
@@ -189,10 +199,10 @@ PADDLE_MAX_NEW_TOKENS  = 512
 
 ---
 
-## Lưu ý
+## Notes
 
-- **GPU cần thiết**: Cả 2 model đều chạy trên CUDA, không có GPU sẽ rất chậm
-- **VRAM**: Cần khoảng 8-12GB VRAM tổng cho cả Paddle + Vintern
-- **Thời gian xử lý**: Mỗi request mất khoảng 1-3 phút tùy độ phức tạp của biểu đồ
-- **Paddle timeout**: Nếu bị timeout, tăng giá trị `timeout=300.0` trong `data_extractor.py`
-- **Web UI**: File `index.html` phải nằm cùng cấp với `main.py` hoặc trong thư mục `static/`
+- **GPU required**: Both models run on CUDA; performance will be very slow without a GPU
+- **VRAM**: Approximately 8-12GB total VRAM is needed for both Paddle and Vintern
+- **Processing time**: Each request takes about 1-3 minutes depending on chart complexity
+- **Paddle timeout**: If a timeout occurs, increase the `timeout=300.0` value in `data_extractor.py`
+- **Web UI**: The `index.html` file must be in the same directory as `main.py` or inside the `static/` folder
