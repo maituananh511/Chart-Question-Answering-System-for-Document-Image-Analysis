@@ -1,0 +1,32 @@
+# Core 
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+pydantic-settings>=2.2.0
+
+# Deep Learning 
+# PyTorch: install separately per CUDA version
+# e.g. pip install torch torchvision,index-url https://download.pytorch.org/whl/cu121
+torch>=2.1.0
+torchvision>=0.16.0
+
+# Transformers 
+# PaddleOCR-VL: dùng transformers>=4.45
+transformers>=4.45.0
+accelerate>=0.27.0
+
+# Vintern: dùng transformers==4.44.x (xung đột với paddle nếu dùng Chung env)
+# Dùng 2 virtual env riêng hoặc deploy bằng model server (TorchServe/Triton)
+# transformers==4.44.2  # uncomment nếu chỉ chạy Vintern
+
+# YOLO 
+ultralytics>=8.2.0
+
+# PaddleOCR-VL dependencies 
+pillow>=10.0.0
+sentencepiece
+tiktoken
+pymupdf
+
+# Utilities 
+python-dotenv>=1.0.0
