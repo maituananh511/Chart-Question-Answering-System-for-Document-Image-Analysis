@@ -14,8 +14,6 @@ The project is optimized for local GPU inference using CUDA and supports locally
 
 The model was fine-tuned (LoRA) on a custom dataset and benchmarked using BLEU, METEOR, ROUGE-1/2/L, and BERTScore — outperforming baseline models (Qwen2.5-VL-2B, InternVL-FT, Llama-3.2-1B, SeaLLMs, StableLM2, Gemma2) as well as the original pretrained checkpoint.
 
-Full details (charts, scores, merge/unmerge comparison, PaddleOCR-VL) are available in [`doc/evaluation`](doc/evaluation).
-
 ![Vintern Fine-tuned vs Other Models](doc/evaluation/vintern_comparison.png)
 
 All three models — **Vintern-LoRA + PaddleOCR-VL**, **InternVL2 QLoRA 1B**, and **Qwen2-VL QLoRA 2B** — were fine-tuned on the same training dataset, allowing for a fair, apples-to-apples comparison of architectures under identical training conditions.
@@ -23,6 +21,7 @@ All three models — **Vintern-LoRA + PaddleOCR-VL**, **InternVL2 QLoRA 1B**, an
 The chart below compares their performance across BLEU, METEOR, ROUGE-1, ROUGE-2, ROUGE-L, and BERTScore.
 
 ![Comparison of Vintern-LoRA against other models](doc/evaluation/vintern_comparison_chart.png)
+Full details (charts, scores, merge/unmerge comparison, PaddleOCR-VL) are available in [`doc/evaluation`](doc/evaluation).
 
 ## Architecture
 
