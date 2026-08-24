@@ -21,7 +21,7 @@ All three models — **Vintern-LoRA + PaddleOCR-VL**, **InternVL2 QLoRA 1B**, an
 The chart below compares their performance across BLEU, METEOR, ROUGE-1, ROUGE-2, ROUGE-L, and BERTScore.
 
 ![Comparison of Vintern-LoRA against other models](doc/evaluation/vintern_comparison_chart.png)
-Full details (charts, scores, merge/unmerge comparison, PaddleOCR-VL) are available in [`doc/evaluation`](doc/evaluation).
+Full details (charts, scores, merge/unmerge comparison, PaddleOCR-VL) are available in [`doc/evaluation`](doc/thesis.pdf).
 
 ## Architecture
 
