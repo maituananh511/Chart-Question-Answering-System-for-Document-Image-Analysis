@@ -17,7 +17,6 @@ The model was fine-tuned (LoRA) on a custom dataset and benchmarked using BLEU, 
 Full details (charts, scores, merge/unmerge comparison, PaddleOCR-VL) are available in [`doc/evaluation`](doc/evaluation).
 
 ![Vintern Fine-tuned vs Other Models](doc/evaluation/vintern_comparison.png)
-## Model Evaluation
 
 All three models — **Vintern-LoRA + PaddleOCR-VL**, **InternVL2 QLoRA 1B**, and **Qwen2-VL QLoRA 2B** — were fine-tuned on the same training dataset, allowing for a fair, apples-to-apples comparison of architectures under identical training conditions.
 
