@@ -8,7 +8,8 @@ The application is implemented with FastAPI and provides both a web interface an
 
 Because PaddleOCR-VL and Vintern require incompatible versions of the Transformers library, the project separates them into two virtual environments and two services. The main FastAPI application runs on port 8000, while the PaddleOCR-VL extraction server runs independently on port 8001. This architecture isolates dependencies while allowing the models to communicate through HTTP.
 
-The project is optimized for local GPU inference using CUDA and supports locally stored model weights. It includes configuration management, upload validation, health monitoring, Swagger API documentation, latency measurement, and GPU memory cleanup. Overall, the project provides an end-to-end solution for converting visual chart data into accessible, conversational answers.
+The project is optimized for local GPU inference using CUDA and supports locally stored model weights. It was developed and run on a machine with 4GB VRAM. It includes configuration management, upload validation, health monitoring, Swagger API documentation, latency measurement, and GPU memory cleanup. Overall, the project provides an end-to-end solution for converting visual chart data into accessible, conversational answers.
+
 ## Evaluation Results
 
 The model was fine-tuned (LoRA) on a custom dataset and benchmarked using BLEU, METEOR, ROUGE-1/2/L, and BERTScore — outperforming baseline models (Qwen2.5-VL-2B, InternVL-FT, Llama-3.2-1B, SeaLLMs, StableLM2, Gemma2) as well as the original pretrained checkpoint.
@@ -16,6 +17,7 @@ The model was fine-tuned (LoRA) on a custom dataset and benchmarked using BLEU, 
 Full details (charts, scores, merge/unmerge comparison, PaddleOCR-VL) are available in [`doc/evaluation`](doc/evaluation).
 
 ![Vintern Fine-tuned vs Other Models](doc/evaluation/vintern_comparison.png)
+
 ## Architecture
 
 ```
